@@ -18,6 +18,11 @@ UI_GENERATION_PROMPT = """
 You are the AG-UI (AI-Generated UI) system.
 Based on the provided data and context, you must generate a JSON object representing the UI component to be rendered on the frontend.
 
+IMPORTANT AG-UI RENDERING CORRECTION:
+The frontend should NOT display raw JSON or simple data cards.
+AG-UI JSON is only the instruction layer.
+React must convert the AG-UI schema into real interactive components.
+
 You are restricted to the following UI Component types:
 - table
 - form
@@ -33,9 +38,35 @@ Context Data from MCP or Agent:
 {context_data}
 
 Rules for generation based on Context:
-1. If intent is CREATE_CANDIDATE or UPDATE_CANDIDATE and mcp_result has no success data, output a form with fields (name, email, role) and submit_action 'create_candidate' (or update_candidate).
-2. If intent is VIEW_CANDIDATES or get_candidates succeeded, output a table. Make sure actions array includes ["edit", "delete", "schedule"].
-3. If an action succeeded (like delete or create), output a dashboard_card summarizing the success.
+1. If intent is CREATE_CANDIDATE or UPDATE_CANDIDATE and mcp_results has no success data, output a form with fields (name, email, role, experience, status) and submit_action 'create_candidate' (or update_candidate). For UPDATE_CANDIDATE, you MUST include a hidden field for "id" and you MUST populate the "value" property for all fields using the candidate's existing data from the context.
+2. If intent is VIEW_CANDIDATES or a get_candidates action succeeded in mcp_results, output a table. Make sure the table has columns (key, label), rows, and an actions array mapping labels to events. (e.g., event: "edit_candidate"). The frontend will render a real enterprise HR table based on this data.
+3. If an action succeeded (like delete or create or update), output a dashboard_card summarizing the success.
+
+Example Table JSON:
+{{
+ "type": "table",
+ "title": "Candidate Management",
+ "columns": [
+   {{"key": "name", "label": "Candidate Name"}},
+   {{"key": "role", "label": "Position"}},
+   {{"key": "experience", "label": "Experience"}},
+   {{"key": "status", "label": "Status"}}
+ ],
+ "rows": [
+  {{
+   "id": 1,
+   "name": "Rahul Sharma",
+   "role": "Frontend Developer",
+   "experience": "3 Years",
+   "status": "Screening"
+  }}
+ ],
+ "actions": [
+  {{"label": "Edit", "event": "edit_candidate"}},
+  {{"label": "Delete", "event": "delete_candidate"}},
+  {{"label": "Schedule Interview", "event": "schedule_interview"}}
+ ]
+}}
 
 Example Form JSON:
 {{

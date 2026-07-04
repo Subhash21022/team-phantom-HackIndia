@@ -10,12 +10,11 @@ class AgentState(TypedDict):
     selected_candidate: Optional[str]
     current_workflow: Optional[str]
     last_ui: Optional[Dict[str, Any]]
-    pending_action: Optional[str]
     
     # Internal agent processing state
     intent: Optional[str]
-    plan: Optional[str]
-    selected_tool: Optional[str]
-    tool_payload: Optional[Dict[str, Any]]
-    mcp_result: Optional[Dict[str, Any]]
+    entities: Optional[Dict[str, Any]]
+    required_tools: Optional[List[str]]
+    plan: Optional[List[Dict[str, Any]]]
+    mcp_results: Optional[List[Dict[str, Any]]]
     final_response: Optional[str]

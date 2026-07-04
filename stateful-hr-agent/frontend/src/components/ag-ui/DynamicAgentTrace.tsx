@@ -1,4 +1,5 @@
-﻿import React from 'react';
+import React from 'react';
+import { ChevronRight, Loader2 } from 'lucide-react';
 
 interface TraceStep {
   label: string;
@@ -23,22 +24,35 @@ export const DynamicAgentTrace: React.FC<DynamicAgentTraceProps> = ({ title, ste
   const rows = steps && steps.length > 0 ? steps : defaultSteps;
 
   return (
-    <div className="w-full workspace-panel rounded-xl border workspace-border p-5">
-      <h3 className="text-lg font-semibold text-slate-900">{title || 'Agent Execution Trace'}</h3>
-      <div className="mt-4 space-y-3">
+    <div className="w-full">
+      <p className="text-[12px] font-medium text-[#737373] uppercase tracking-wider mb-3">
+        {title || 'Agent Execution Trace'}
+      </p>
+      <div className="space-y-2">
         {rows.map((step, idx) => {
           const status = step.status || 'done';
-          const dotClass =
-            status === 'running'
-              ? 'text-amber-500'
-              : status === 'pending'
-                ? 'text-slate-400'
-                : 'text-emerald-500';
 
           return (
-            <div key={`${step.label}-${idx}`} className="rounded-md border border-slate-200 bg-white px-3 py-2">
-              <p className="text-sm font-medium text-slate-800"><span className={dotClass}>?</span> {step.label}</p>
-              {step.detail && <p className="text-xs text-slate-500 mt-1">{step.detail}</p>}
+            <div
+              key={`${step.label}-${idx}`}
+              className="rounded-lg bg-white border border-[#e5e5e5] px-3 py-2.5 flex items-start gap-3 shadow-sm"
+            >
+              <span className="mt-0.5 flex-shrink-0">
+                {status === 'done' ? (
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#16a34a]" />
+                ) : status === 'running' ? (
+                  <Loader2 className="w-3 h-3 text-[#737373] animate-spin -mt-0.5" />
+                ) : (
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#d4d4d4]" />
+                )}
+              </span>
+
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-medium text-black leading-snug">{step.label}</p>
+                {step.detail && (
+                  <p className="text-[10px] text-[#737373] font-mono mt-1">{step.detail}</p>
+                )}
+              </div>
             </div>
           );
         })}
@@ -46,4 +60,8 @@ export const DynamicAgentTrace: React.FC<DynamicAgentTraceProps> = ({ title, ste
     </div>
   );
 };
+
+
+
+
 

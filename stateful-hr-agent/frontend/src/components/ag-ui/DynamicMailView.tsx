@@ -1,4 +1,5 @@
-﻿import React from 'react';
+import React from 'react';
+import { Mail, Send } from 'lucide-react';
 
 interface MailAction {
   label: string;
@@ -22,36 +23,50 @@ export const DynamicMailView: React.FC<DynamicMailViewProps> = ({
   onAction,
 }) => {
   return (
-    <div className="w-full workspace-panel rounded-xl border workspace-border p-5">
-      <h3 className="text-lg font-semibold text-slate-900">{title || 'Mail View'}</h3>
-      <p className="text-sm text-slate-600 mt-2">{summary || 'Latest email operations are shown here.'}</p>
+    <div className="w-full max-w-2xl">
+      <div className="flex items-center gap-2 mb-4 text-[13px] font-medium text-[#404040]">
+        <Mail className="w-4 h-4 text-[#737373]" strokeWidth={2} />
+        {title || 'Mail View'}
+      </div>
+      <div className="rounded-xl bg-white border border-[#e5e5e5] p-5 shadow-sm">
+        <p className="text-[13px] text-[#404040] leading-relaxed">
+          {summary || 'Latest email operations are shown here.'}
+        </p>
 
-      {recipients && recipients.length > 0 && (
-        <div className="mt-4">
-          <p className="text-sm font-medium text-slate-700">Recipients</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {recipients.map((r) => (
-              <span key={r} className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-700">{r}</span>
+        {recipients && recipients.length > 0 && (
+          <div className="mt-5 pt-4 border-t border-[#f0f0f0]">
+            <p className="text-[11px] font-medium text-[#737373] mb-2">Recipients</p>
+            <div className="flex flex-wrap gap-2">
+              {recipients.map((r) => (
+                <span key={r} className="bg-[#fafafa] border border-[#e5e5e5] rounded px-2 py-1 text-[11px] font-mono text-[#404040]">
+                  {r}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {actions && actions.length > 0 && (
+          <div className="mt-6 flex flex-wrap gap-2">
+            {actions.map((a) => (
+              <button
+                key={a.label}
+                type="button"
+                onClick={() => onAction(a.event, a.payload || {})}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium bg-black text-white hover:bg-[#333] transition-colors"
+              >
+                <Send className="w-3 h-3" strokeWidth={2} />
+                {a.label}
+              </button>
             ))}
           </div>
-        </div>
-      )}
-
-      {actions && actions.length > 0 && (
-        <div className="mt-5 flex flex-wrap gap-2">
-          {actions.map((a) => (
-            <button
-              key={a.label}
-              type="button"
-              onClick={() => onAction(a.event, a.payload || {})}
-              className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700"
-            >
-              {a.label}
-            </button>
-          ))}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
+
+
+
+
 

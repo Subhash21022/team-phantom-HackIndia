@@ -1,38 +1,62 @@
 import React from 'react';
 
+interface CardAction {
+  label: string;
+  event: string;
+}
+
 interface DynamicCardProps {
   title: string;
   content?: string;
   data?: any;
-  actions?: string[];
+  actions?: (string | CardAction)[];
   onAction: (event: string, payload: any) => void;
 }
 
 export const DynamicCard: React.FC<DynamicCardProps> = ({ title, content, data, actions, onAction }) => {
   return (
-    <div className="w-full max-w-sm bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mb-4">
-      <div className="px-6 py-5">
-        <div className="font-bold text-lg mb-2 text-slate-800">{title}</div>
-        {content && <p className="text-slate-600 text-sm mb-4 leading-relaxed">{content}</p>}
+    <div className="w-full max-w-sm rounded-xl bg-white border border-[#e5e5e5] shadow-sm overflow-hidden mb-4">
+      <div className="px-5 py-5">
+        <h3 className="text-[14px] font-semibold text-black">{title}</h3>
+        {content && (
+          <div className="text-[12px] text-[#404040] mt-2 leading-relaxed">
+            {typeof content === 'string' ? content : (
+              <pre className="font-mono text-[10px] bg-[#fafafa] border border-[#e5e5e5] p-2 rounded">
+                {JSON.stringify(content, null, 2)}
+              </pre>
+            )}
+          </div>
+        )}
         {data && (
-          <div className="text-xs bg-slate-50 p-3 rounded-md mb-2 overflow-x-auto border border-slate-100">
-            <pre className="text-slate-700">{JSON.stringify(data, null, 2)}</pre>
+          <div className="mt-3 rounded-lg bg-[#fafafa] border border-[#f0f0f0] p-3 overflow-x-auto">
+            <pre className="text-[10px] font-mono text-[#737373]">{JSON.stringify(data, null, 2)}</pre>
           </div>
         )}
       </div>
       {actions && actions.length > 0 && (
-        <div className="px-6 py-4 bg-slate-50 flex gap-2 flex-wrap border-t border-gray-100">
-          {actions.map(action => (
-            <button
-              key={action}
-              onClick={() => onAction(action, data || {})}
-              className="bg-white border border-slate-200 shadow-sm rounded-md px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition"
-            >
-              {action}
-            </button>
-          ))}
+        <div className="px-5 py-3 bg-[#fafafa] border-t border-[#e5e5e5] flex gap-2 flex-wrap">
+          {actions.map((action, idx) => {
+            const isObj = typeof action === 'object' && action !== null;
+            const label = isObj ? (action as CardAction).label : (action as string);
+            const eventName = isObj ? (action as CardAction).event : (action as string);
+            
+            return (
+              <button
+                key={`${label}-${idx}`}
+                onClick={() => onAction(eventName, data || {})}
+                className="px-3 py-1.5 rounded-md text-[11px] font-medium bg-white text-[#404040] border border-[#d4d4d4] hover:bg-[#f5f5f5] hover:text-black transition-colors"
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
   );
 };
+
+
+
+
+

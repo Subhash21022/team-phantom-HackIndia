@@ -1,4 +1,4 @@
-# Stateful AI HR Agent Platform
+﻿# Stateful AI HR Agent Platform
 
 A stateful AI HR Agent Platform built with Next.js 15, FastAPI, LangGraph, and PostgreSQL.
 
@@ -38,3 +38,35 @@ A stateful AI HR Agent Platform built with Next.js 15, FastAPI, LangGraph, and P
    ```bash
    cd backend
    .\\venv\\Scripts\\python.exe -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+   ```
+
+## Run With Docker
+
+1. From `stateful-hr-agent`, copy env template:
+   ```bash
+   cp .env.docker.example .env
+   ```
+
+2. Build and run all services:
+   ```bash
+   docker compose up --build
+   ```
+
+3. Open:
+   - Frontend: `http://localhost:3000`
+   - Backend: `http://localhost:8000`
+
+### Services
+- `db` (PostgreSQL 16)
+- `backend` (FastAPI on 8000)
+- `frontend` (Next.js dev server on 3000)
+
+### Stop
+```bash
+docker compose down
+```
+
+### Stop and remove DB volume
+```bash
+docker compose down -v
+```

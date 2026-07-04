@@ -1,0 +1,28 @@
+﻿# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
+# Venv
+backend/venv/
+
+# Node
+frontend/node_modules/
+frontend/.next/
+
+# Git
+.git/
+.gitignore
+
+# Local artifacts
+frontend/next-dev.err.log
+frontend/next-dev.out.log
+frontend/tsconfig.tsbuildinfo
+backend/uvicorn.err.log
+backend/uvicorn.out.log
+
+# OS
+.DS_Store
+Thumbs.db

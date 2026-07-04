@@ -1,13 +1,4 @@
-﻿import React from 'react';
-import { DynamicTable } from './DynamicTable';
-import { DynamicForm } from './DynamicForm';
-import { DynamicCalendar } from './DynamicCalendar';
-import { DynamicCard } from './DynamicCard';
-import { DynamicDocument } from './DynamicDocument';
-import { DynamicWorkspaceOverview } from './DynamicWorkspaceOverview';
-import { DynamicAgentTrace } from './DynamicAgentTrace';
-import { DynamicDataExplorer } from './DynamicDataExplorer';
-import { DynamicMailView } from './DynamicMailView';
+import React from 'react';
 
 export interface UIConfig {
   type: string;
@@ -19,6 +10,17 @@ interface DynamicRendererProps {
   actionState?: { isBusy: boolean; event: string | null };
   onEmitEvent: (eventPayload: { event: string; payload: any }) => void;
 }
+
+// Lazy imports to keep the file clean
+import { DynamicTable } from './DynamicTable';
+import { DynamicForm } from './DynamicForm';
+import { DynamicCalendar } from './DynamicCalendar';
+import { DynamicCard } from './DynamicCard';
+import { DynamicDocument } from './DynamicDocument';
+import { DynamicWorkspaceOverview } from './DynamicWorkspaceOverview';
+import { DynamicAgentTrace } from './DynamicAgentTrace';
+import { DynamicDataExplorer } from './DynamicDataExplorer';
+import { DynamicMailView } from './DynamicMailView';
 
 export const DynamicRenderer: React.FC<DynamicRendererProps> = ({ uiConfig, actionState, onEmitEvent }) => {
   if (!uiConfig) return null;
@@ -51,17 +53,25 @@ export const DynamicRenderer: React.FC<DynamicRendererProps> = ({ uiConfig, acti
       return <DynamicDocument {...(uiConfig as any)} onAction={handleAction} />;
     case 'timeline':
       return (
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded">
-          <h3 className="font-bold mb-2">{uiConfig.title || 'Timeline'}</h3>
-          <pre className="text-xs">{JSON.stringify(uiConfig.events, null, 2)}</pre>
+        <div className="rounded-xl bg-white border border-[#e5e5e5] shadow-sm p-5">
+          <p className="text-[13px] font-medium text-black mb-3">{uiConfig.title || 'Timeline'}</p>
+          <pre className="text-[11px] font-mono text-[#404040] bg-[#fafafa] border border-[#f0f0f0] p-3 rounded-md overflow-x-auto">
+            {JSON.stringify(uiConfig.events, null, 2)}
+          </pre>
         </div>
       );
     default:
       return (
-        <div className="p-4 bg-yellow-50 text-yellow-800 rounded border border-yellow-200 text-sm font-medium">
-          Unsupported UI component type: {uiConfig.type}
+        <div className="rounded-xl border border-dashed border-[#d4d4d4] bg-[#fafafa] p-5 text-center">
+          <p className="text-[12px] text-[#737373]">
+            Unsupported component: <span className="bg-white border border-[#e5e5e5] px-1.5 py-0.5 rounded text-[#404040] ml-1">{uiConfig.type}</span>
+          </p>
         </div>
       );
   }
 };
+
+
+
+
 

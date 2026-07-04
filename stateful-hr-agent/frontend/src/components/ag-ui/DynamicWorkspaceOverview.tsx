@@ -1,4 +1,5 @@
-﻿import React from 'react';
+import React from 'react';
+import { ChevronRight } from 'lucide-react';
 
 interface ToolStatus {
   id: string;
@@ -35,29 +36,40 @@ export const DynamicWorkspaceOverview: React.FC<DynamicWorkspaceOverviewProps> =
   const domainList = domains && domains.length > 0 ? domains : defaultDomains;
 
   return (
-    <div className="w-full workspace-panel rounded-2xl border workspace-border p-6 md:p-7 shadow-[0_10px_40px_rgba(15,23,42,0.08)]">
-      <h2 className="text-3xl font-bold text-slate-900 text-center tracking-tight">{title || 'HR AI Workspace'}</h2>
+    <div className="w-full">
+      <div className="text-center mb-8 mt-4">
+        <h2 className="text-2xl font-semibold text-black tracking-tight">
+          {title || 'HR AI Workspace'}
+        </h2>
+        <p className="text-[13px] text-[#737373] mt-2">
+          What do you want to manage?
+        </p>
+      </div>
 
-      <p className="mt-6 text-center text-sm font-semibold text-slate-700">What do you want to manage?</p>
-
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
         {domainList.map((domain) => (
           <button
             key={domain.id}
             type="button"
             onClick={() => onAction('open_domain', { domain: domain.id })}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-4 text-left hover:border-indigo-300 hover:bg-indigo-50/40 transition shadow-sm"
+            className="group flex items-center gap-4 rounded-xl bg-white border border-[#e5e5e5] shadow-sm p-4 text-left hover:bg-[#fafafa] hover:border-[#d4d4d4] transition-all"
           >
-            <p className="text-base font-semibold text-slate-900 flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-700 text-xs font-bold">
-                {domain.emoji}
-              </span>
-              {domain.title}
-            </p>
-            <p className="text-sm text-slate-600 mt-1">{domain.subtitle}</p>
+            <div className="w-10 h-10 rounded-lg bg-[#f5f5f5] border border-[#e5e5e5] flex items-center justify-center text-[14px] font-semibold text-black flex-shrink-0 group-hover:bg-black group-hover:text-black transition-colors">
+              {domain.emoji}
+            </div>
+            <div className="flex-1">
+              <p className="text-[14px] font-medium text-black">{domain.title}</p>
+              <p className="text-[11px] text-[#737373] mt-0.5">{domain.subtitle}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#a3a3a3] group-hover:text-black transition-colors" />
           </button>
         ))}
       </div>
     </div>
   );
 };
+
+
+
+
+
