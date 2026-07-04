@@ -74,15 +74,21 @@ async def mcp_execution(state: AgentState) -> AgentState:
         "selected_candidate": selected_candidate
     }
 
+from app.agent.ui_generator import generate_ui
+
 async def ag_ui_generation(state: AgentState) -> AgentState:
-    prompt = AG_UI_PROMPT.format(mcp_result=state.get("mcp_result"))
-    response = await llm.ainvoke(prompt)
-    try:
-        raw_content = response.content.replace("```json", "").replace("```", "").strip()
-        ui_data = json.loads(raw_content)
-        return {"last_ui": ui_data}
-    except Exception:
-        return {"last_ui": {"type": "TextResponse", "props": {"text": "UI generation failed"}}}
+    mcp_result = state.get("mcp_result", {})
+    intent = state.get("intent", "")
+    
+    # Bundle context data to give the UI Generator enough information
+    context_data = {
+        "mcp_result": mcp_result,
+        "intent": intent,
+        "selected_candidate": state.get("selected_candidate")
+    }
+    
+    ui_data = await generate_ui(context_data)
+    return {"last_ui": ui_data}
 
 async def response_node(state: AgentState) -> AgentState:
     prompt = RESPONSE_PROMPT.format(

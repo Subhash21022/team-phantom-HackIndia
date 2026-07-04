@@ -1,11 +1,16 @@
 INTENT_DETECTION_PROMPT = """
 You are the intent detection module of an AI HR Agent.
 Analyze the user's latest message and current conversation history.
-Determine the primary intent (e.g., VIEW_CANDIDATE, SCHEDULE_INTERVIEW, GENERATE_OFFER, GENERAL_QUERY).
+Determine the primary intent. 
+Possible Intents:
+- VIEW_CANDIDATES
+- CREATE_CANDIDATE
+- UPDATE_CANDIDATE
+- DELETE_CANDIDATE
+- SCHEDULE_INTERVIEW
+- GENERAL_QUERY
 
 Current Selected Candidate: {selected_candidate}
-Current Workflow: {current_workflow}
-
 User Message: {user_message}
 
 Return ONLY the intent string.
@@ -13,12 +18,15 @@ Return ONLY the intent string.
 
 PLANNING_PROMPT = """
 You are the planning module. Based on the intent '{intent}', formulate a plan.
-If the intent is to schedule an interview, what tool should be used next? 
+If the user wants to CREATE or UPDATE a candidate but hasn't provided the data, plan to render a FORM first (tool = none).
+If the user provided the data (e.g., submitted a form), plan to use the 'postgres' tool.
+If the user wants to view candidates, use 'get_candidates'.
+If the user wants to delete, use 'delete_candidate'.
+
 Available tools:
-- postgres (get_candidates, create_interview, update_candidate, delete_candidate)
+- postgres (create_candidate, get_candidates, update_candidate, delete_candidate, create_interview)
 - calendar (create_event)
-- gmail (send_email)
-- docs (generate_document)
+- none (if we just need to render a form to ask for input)
 
 Current Selected Candidate: {selected_candidate}
 
@@ -29,23 +37,18 @@ TOOL_SELECTION_PROMPT = """
 Based on the plan '{plan}' and intent '{intent}', output the exact tool/server and action to execute.
 Also extract necessary payload from the conversation context.
 
+If no tool is needed, set server to "none".
+
 Format as JSON:
 {{
-    "server": "postgres|gmail|calendar|docs",
-    "action": "action_name",
+    "server": "postgres|calendar|none",
+    "action": "action_name_or_empty",
     "payload": {{"key": "value"}}
 }}
 """
 
 AG_UI_PROMPT = """
-You are the AG-UI Generation module. Based on the MCP execution result, generate a UI component specification.
-Result: {mcp_result}
-
-Output a JSON object describing the UI:
-{{
-    "type": "CandidateCard|InterviewModal|SuccessToast",
-    "props": {{"title": "...", "details": "..."}}
-}}
+(This prompt is now handled by ui_generator.py)
 """
 
 RESPONSE_PROMPT = """
