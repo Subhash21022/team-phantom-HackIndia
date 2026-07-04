@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
-import { DynamicRenderer, UIConfig } from '../components/ag-ui/DynamicRenderer';
-import { Send, Loader2, Bot, User, Sparkles } from 'lucide-react';
+import { DynamicRenderer, UIConfig } from '../../components/ag-ui/DynamicRenderer';
+import { Send, Loader2, Bot, User, Sparkles, Activity, FileText, Users, ChevronRight, Presentation } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   const [messages, setMessages] = useState<{role: 'user'|'agent', text: string}[]>([]);
@@ -34,48 +35,69 @@ export default function Home() {
       
       const data = await res.json();
       
-      // Add a tiny artificial delay to simulate typing stream aesthetics
       setTimeout(() => {
           setMessages(prev => [...prev, { role: 'agent', text: data.response }]);
           if (data.ui) {
               setUiConfig(data.ui);
           }
           setIsLoading(false);
-      }, 300);
+      }, 400);
 
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'agent', text: 'Connection to AI HR Agent failed. Ensure backend is running.' }]);
+      setMessages(prev => [...prev, { role: 'agent', text: 'Error: Cannot connect to FastAPI backend.' }]);
       setIsLoading(false);
     }
   };
 
   const handleAction = (payload: { event: string; payload: any }) => {
-    const actionText = `[Action executed: ${payload.event}]`;
-    setMessages(prev => [...prev, { role: 'user', text: actionText }]);
-    sendMessage(`The user executed an action on the UI: ${payload.event}. Associated payload data: ${JSON.stringify(payload.payload)}. Please process this and update the UI accordingly.`, true);
+    setMessages(prev => [...prev, { role: 'user', text: `[System Event: ${payload.event}]` }]);
+    sendMessage(`The user executed action: ${payload.event}. Payload: ${JSON.stringify(payload.payload)}. Update the database and UI accordingly.`, true);
   };
 
+  const demoPrompts = [
+    "Show frontend candidates",
+    "Schedule an interview for Alice",
+    "Generate an offer letter for Bob",
+    "Convert Alice to employee"
+  ];
+
   return (
-    <div className="flex h-screen w-full bg-[#1C1C1E] text-[#F2F2F7] font-sans overflow-hidden selection:bg-indigo-500/30">
+    <div className="flex h-screen w-full bg-[#1C1C1E] text-[#F2F2F7] font-sans overflow-hidden">
       
       {/* LEFT: Chat Interface */}
       <div className="w-[380px] border-r border-[#2C2C2E] flex flex-col bg-[#1C1C1E] flex-shrink-0 z-10 shadow-2xl">
-        <div className="p-5 border-b border-[#2C2C2E] flex items-center gap-3 bg-[#1C1C1E]">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <Sparkles className="w-4 h-4 text-white" />
+        <div className="p-5 border-b border-[#2C2C2E] flex justify-between items-center bg-[#1C1C1E]">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <h1 className="font-semibold text-sm text-[#F2F2F7]">HR Intelligence</h1>
+              <p className="text-[11px] text-[#8E8E93] uppercase tracking-wider font-medium mt-0.5">Agentic Workspace</p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-semibold text-sm text-[#F2F2F7]">HR Intelligence</h1>
-            <p className="text-[11px] text-[#8E8E93] uppercase tracking-wider font-medium mt-0.5">Agentic Workspace</p>
-          </div>
+          <Link href="/architecture" className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-indigo-500/10 px-2.5 py-1.5 rounded-full transition">
+            Arch <ChevronRight className="w-3 h-3" />
+          </Link>
         </div>
         
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 opacity-60 mt-[-20px]">
-              <Bot className="w-12 h-12 text-[#8E8E93]" />
-              <p className="text-sm text-[#8E8E93] max-w-[220px]">How can I help you manage your candidates and workflows today?</p>
+            <div className="h-full flex flex-col items-center justify-center text-center opacity-70 mt-[-10px] animate-in fade-in duration-500">
+              <Presentation className="w-12 h-12 text-indigo-400 mb-4" />
+              <p className="text-sm font-medium text-[#F2F2F7] mb-3">Hackathon Demo Mode</p>
+              <div className="space-y-2.5 w-full px-2">
+                {demoPrompts.map((p, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => sendMessage(p)}
+                    className="w-full text-xs text-left bg-[#2C2C2E] hover:bg-[#3A3A3C] transition p-3 rounded-xl text-[#D1D1D6] border border-[#3A3A3C] hover:border-indigo-500/30"
+                  >
+                    "{p}"
+                  </button>
+                ))}
+              </div>
             </div>
           )}
           
@@ -97,7 +119,7 @@ export default function Home() {
                 <div className="w-6 h-6 flex-shrink-0 rounded-full bg-indigo-500 flex items-center justify-center mt-1">
                   <Bot className="w-3 h-3 text-white" />
                 </div>
-                <div className="p-3.5">
+                <div className="p-3.5 flex items-center justify-center h-[48px]">
                   <Loader2 className="w-4 h-4 animate-spin text-[#8E8E93]" />
                 </div>
               </div>
@@ -112,8 +134,8 @@ export default function Home() {
               type="text" 
               value={input}
               onChange={e => setInput(e.target.value)}
-              placeholder="Message the agent..." 
-              className="w-full bg-[#2C2C2E] text-[#F2F2F7] placeholder-[#8E8E93] rounded-xl pl-4 pr-12 py-3.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/50 transition-all border border-[#3A3A3C] focus:border-indigo-500/50"
+              placeholder="Type a command..." 
+              className="w-full bg-[#2C2C2E] text-[#F2F2F7] placeholder-[#8E8E93] rounded-xl pl-4 pr-12 py-3.5 text-sm focus:outline-none border border-[#3A3A3C] focus:border-indigo-500/50"
               disabled={isLoading}
             />
             <button 
@@ -124,30 +146,52 @@ export default function Home() {
               <Send className="w-4 h-4" />
             </button>
           </form>
-          <div className="text-center mt-3">
-            <p className="text-[10px] text-[#8E8E93]">AI can make mistakes. Verify important HR actions.</p>
-          </div>
         </div>
       </div>
 
       {/* RIGHT: Dynamic Workspace */}
-      <div className="flex-1 bg-[#09090B] relative overflow-y-auto p-10 flex flex-col items-center">
+      <div className="flex-1 bg-gradient-to-br from-[#09090B] to-[#161618] relative overflow-y-auto p-10 flex flex-col items-center justify-center">
         {!uiConfig ? (
-          <div className="w-full h-full flex flex-col items-center justify-center opacity-40">
-            <Sparkles className="w-16 h-16 text-[#8E8E93] mb-5" />
-            <h2 className="text-xl font-medium text-[#F2F2F7]">Workspace Ready</h2>
-            <p className="text-[#8E8E93] mt-2 text-sm">Ask the agent to look up a candidate, schedule an interview, or generate an offer.</p>
+          <div className="w-full max-w-5xl animate-in fade-in zoom-in-95 duration-500">
+            <div className="mb-8 pl-2">
+              <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Dashboard Overview</h2>
+              <p className="text-[#8E8E93]">Welcome to the Stateful AI HR Agent Platform.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {[
+                { title: 'Total Candidates', value: '142', icon: Users, color: 'text-blue-400', bg: 'bg-blue-400/10' },
+                { title: 'Pending Interviews', value: '12', icon: Activity, color: 'text-purple-400', bg: 'bg-purple-400/10' },
+                { title: 'Offers Sent', value: '5', icon: FileText, color: 'text-emerald-400', bg: 'bg-emerald-400/10' }
+              ].map((stat, i) => (
+                <div key={i} className="bg-[#1C1C1E]/80 backdrop-blur-sm border border-[#2C2C2E] p-6 rounded-3xl flex items-center gap-5 hover:border-[#3A3A3C] transition shadow-lg">
+                  <div className={`w-14 h-14 rounded-full ${stat.bg} ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="text-sm font-medium text-[#8E8E93]">{stat.title}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="bg-[#1C1C1E]/50 border border-[#2C2C2E] rounded-3xl p-10 text-center border-dashed">
+              <Sparkles className="w-10 h-10 text-indigo-500/50 mx-auto mb-4 animate-pulse" />
+              <h3 className="text-lg font-medium text-[#D1D1D6]">Agentic UI Canvas</h3>
+              <p className="text-[#8E8E93] text-sm mt-3 max-w-md mx-auto leading-relaxed">
+                Click a demo action on the left or type a command. The LLM will autonomously plan its steps, execute MCP actions, and generate the UI in this space.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="w-full max-w-4xl transition-all duration-500 ease-out transform translate-y-0 opacity-100">
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 shadow-2xl">
-              {/* Dynamic renderer handles the actual UI logic inside the isolated container */}
+            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-[32px] p-8 shadow-2xl">
               <DynamicRenderer uiConfig={uiConfig} onEmitEvent={handleAction} />
             </div>
           </div>
         )}
       </div>
-      
     </div>
   );
 }

@@ -22,10 +22,13 @@ If the user wants to CREATE or UPDATE a candidate but hasn't provided the data, 
 If the user provided the data (e.g., submitted a form), plan to use the 'postgres' tool.
 If the user wants to view candidates, use 'get_candidates'.
 If the user wants to delete, use 'delete_candidate'.
+If the user wants to convert a candidate to an employee, use 'convert_to_employee'.
 
 Available tools:
-- postgres (create_candidate, get_candidates, update_candidate, delete_candidate, create_interview)
+- postgres (create_candidate, get_candidates, update_candidate, delete_candidate, create_interview, convert_to_employee)
 - calendar (create_event)
+- gmail (send_email)
+- docs (generate_document)
 - none (if we just need to render a form to ask for input)
 
 Current Selected Candidate: {selected_candidate}

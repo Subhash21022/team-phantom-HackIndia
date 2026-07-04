@@ -41,6 +41,26 @@ async def execute_postgres(action: str, payload: Dict[str, Any]) -> Dict[str, An
                 return {"status": "success", "message": "Candidate deleted"}
             return {"status": "error", "message": "candidate not found"}
             
+        elif action == "convert_to_employee":
+            candidate_id = payload.get("id")
+            if not candidate_id:
+                return {"status": "error", "message": "candidate id required"}
+            db_candidate = await candidate_repo.get_candidate(db, candidate_id)
+            if db_candidate:
+                from app.database import models
+                employee = models.Employee(
+                    name=db_candidate.name,
+                    email=db_candidate.email,
+                    department="Engineering", # default for demo
+                    position=db_candidate.role
+                )
+                db.add(employee)
+                # optionally delete the candidate here
+                await candidate_repo.delete_candidate(db, candidate_id)
+                await db.commit()
+                return {"status": "success", "message": f"{db_candidate.name} officially converted to an Employee!"}
+            return {"status": "error", "message": "candidate not found"}
+            
         elif action == "create_interview":
             # Mocking interview creation since we didn't fully implement interview repo yet
             candidate_id = payload.get("candidate_id")
