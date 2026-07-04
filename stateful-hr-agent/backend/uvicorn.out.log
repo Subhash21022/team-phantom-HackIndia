@@ -1,0 +1,60 @@
+2026-07-04 18:50:36,297 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-07-04 18:50:36,302 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-04 18:50:36,975 INFO sqlalchemy.engine.Engine select current_schema()
+2026-07-04 18:50:36,992 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-04 18:50:38,400 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-07-04 18:50:38,402 INFO sqlalchemy.engine.Engine [raw sql] ()
+2026-07-04 18:50:39,118 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-04 18:50:39,124 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-07-04 18:50:39,126 INFO sqlalchemy.engine.Engine [generated in 0.00162s] ('candidates', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-07-04 18:50:40,143 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-07-04 18:50:40,144 INFO sqlalchemy.engine.Engine [cached since 1.02s ago] ('employees', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-07-04 18:50:40,760 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-07-04 18:50:40,817 INFO sqlalchemy.engine.Engine [cached since 1.694s ago] ('interviews', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-07-04 18:50:41,579 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-07-04 18:50:41,597 INFO sqlalchemy.engine.Engine [cached since 2.474s ago] ('offer_letters', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-07-04 18:50:42,196 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-07-04 18:50:42,197 INFO sqlalchemy.engine.Engine [cached since 3.073s ago] ('conversation_memory', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-07-04 18:50:42,809 INFO sqlalchemy.engine.Engine SELECT pg_catalog.pg_class.relname 
+FROM pg_catalog.pg_class JOIN pg_catalog.pg_namespace ON pg_catalog.pg_namespace.oid = pg_catalog.pg_class.relnamespace 
+WHERE pg_catalog.pg_class.relname = $1::VARCHAR AND pg_catalog.pg_class.relkind = ANY (ARRAY[$2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::VARCHAR, $6::VARCHAR]) AND pg_catalog.pg_table_is_visible(pg_catalog.pg_class.oid) AND pg_catalog.pg_namespace.nspname != $7::VARCHAR
+2026-07-04 18:50:42,816 INFO sqlalchemy.engine.Engine [cached since 3.692s ago] ('agent_state', 'r', 'p', 'f', 'v', 'm', 'pg_catalog')
+2026-07-04 18:50:43,250 INFO sqlalchemy.engine.Engine COMMIT
+2026-07-04 18:51:13,224 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-04 18:51:13,225 INFO sqlalchemy.engine.Engine SELECT 1
+2026-07-04 18:51:13,225 INFO sqlalchemy.engine.Engine [generated in 0.00030s] ()
+2026-07-04 18:51:13,775 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:60271 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56911 - "OPTIONS /api/chat/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56911 - "POST /api/chat/ HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:64614 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64614 - "GET /openapi.json HTTP/1.1" 200 OK
+2026-07-04 19:04:32,802 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-04 19:04:32,814 INFO sqlalchemy.engine.Engine SELECT 1
+2026-07-04 19:04:32,818 INFO sqlalchemy.engine.Engine [cached since 799.6s ago] ()
+2026-07-04 19:04:33,573 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:64614 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64614 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59061 - "POST /api/chat/ HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:55984 - "POST /api/chat/ HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:63603 - "OPTIONS /api/chat/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63603 - "POST /api/chat/ HTTP/1.1" 500 Internal Server Error
+2026-07-04 19:35:35,178 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-07-04 19:35:35,188 INFO sqlalchemy.engine.Engine SELECT 1
+2026-07-04 19:35:35,189 INFO sqlalchemy.engine.Engine [cached since 2662s ago] ()
+2026-07-04 19:35:36,234 INFO sqlalchemy.engine.Engine COMMIT
+INFO:     127.0.0.1:62455 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61676 - "POST /api/chat/ HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:60663 - "POST /api/chat/ HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:59926 - "POST /api/chat/ HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:59945 - "OPTIONS /api/chat/ HTTP/1.1" 400 Bad Request

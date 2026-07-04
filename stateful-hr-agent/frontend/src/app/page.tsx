@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
-import { DynamicRenderer, UIConfig } from '../../components/ag-ui/DynamicRenderer';
+import { DynamicRenderer, UIConfig } from '../components/ag-ui/DynamicRenderer';
 import { Send, Loader2, Bot, User, Sparkles, Activity, FileText, Users, ChevronRight, Presentation } from 'lucide-react';
 import Link from 'next/link';
 
@@ -15,6 +15,21 @@ export default function Home() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  // Load candidates UI schema on mount so the right pane shows the table/form
+  useEffect(() => {
+    const loadUi = async () => {
+      try {
+        const res = await fetch('http://localhost:8000/api/ui-schema/candidates');
+        if (!res.ok) return;
+        const ui = await res.json();
+        setUiConfig(ui);
+      } catch (e) {
+        console.error('Failed to load UI schema', e);
+      }
+    };
+    loadUi();
+  }, []);
 
   const sendMessage = async (text: string, isAction: boolean = false) => {
     if (!text.trim()) return;
@@ -50,9 +65,47 @@ export default function Home() {
     }
   };
 
-  const handleAction = (payload: { event: string; payload: any }) => {
-    setMessages(prev => [...prev, { role: 'user', text: `[System Event: ${payload.event}]` }]);
-    sendMessage(`The user executed action: ${payload.event}. Payload: ${JSON.stringify(payload.payload)}. Update the database and UI accordingly.`, true);
+  const handleAction = async (payload: { event: string; payload: any }) => {
+    // client-side action routing for dynamic UI
+    const { event, payload: pl } = payload;
+
+    // map events from DynamicTable buttons (e.g., "Create_action")
+    if (event === 'Create_action') {
+      // switch to create form provided by uiConfig
+      if (uiConfig && uiConfig.create_form) {
+        setUiConfig(uiConfig.create_form);
+      }
+      return;
+    }
+
+    // handle form submission action 'create_candidate'
+    if (event === 'create_candidate') {
+      try {
+        const res = await fetch('http://localhost:8000/api/candidates/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pl)
+        });
+        if (!res.ok) {
+          const err = await res.text();
+          console.error('Failed to create candidate', err);
+          return;
+        }
+        const created = await res.json();
+        // refresh the table UI by reloading schema
+        const schemaRes = await fetch('http://localhost:8000/api/ui-schema/candidates');
+        if (schemaRes.ok) setUiConfig(await schemaRes.json());
+        // show confirmation in chat
+        setMessages(prev => [...prev, { role: 'agent', text: `Created candidate ${created.name}` }]);
+      } catch (e) {
+        console.error(e);
+      }
+      return;
+    }
+
+    // default: send event to LLM/agent as message
+    setMessages(prev => [...prev, { role: 'user', text: `[System Event: ${event}]` }]);
+    sendMessage(`The user executed action: ${event}. Payload: ${JSON.stringify(pl)}. Update the database and UI accordingly.`, true);
   };
 
   const demoPrompts = [
@@ -142,6 +195,8 @@ export default function Home() {
               type="submit" 
               disabled={isLoading || !input.trim()}
               className="absolute right-2 p-2 rounded-lg bg-indigo-500 text-white disabled:opacity-40 disabled:bg-transparent transition-colors hover:bg-indigo-600"
+              aria-label="Send message"
+              title="Send message"
             >
               <Send className="w-4 h-4" />
             </button>
@@ -195,3 +250,4 @@ export default function Home() {
     </div>
   );
 }
+

@@ -12,9 +12,21 @@ from app.agent.prompts import (
 from app.mcp.client import mcp_client
 from app.services.llm import get_agent_llm, get_fast_llm
 
-# Initialize LLMs using the centralized provider
-core_llm = get_agent_llm()
-content_llm = get_fast_llm()
+# LLMs are lazily initialized to ensure env vars are loaded first
+_core_llm = None
+_content_llm = None
+
+def get_core_llm():
+    global _core_llm
+    if _core_llm is None:
+        _core_llm = get_agent_llm()
+    return _core_llm
+
+def get_content_llm():
+    global _content_llm
+    if _content_llm is None:
+        _content_llm = get_fast_llm()
+    return _content_llm
 
 async def input_node(state: AgentState) -> AgentState:
     # Passthrough
@@ -27,7 +39,7 @@ async def intent_detection(state: AgentState) -> AgentState:
         current_workflow=state.get("current_workflow"),
         user_message=user_message
     )
-    response = await core_llm.ainvoke(prompt)
+    response = await get_core_llm().ainvoke(prompt)
     return {"intent": response.content.strip()}
 
 async def memory_retrieval(state: AgentState) -> AgentState:
@@ -39,7 +51,7 @@ async def planning_node(state: AgentState) -> AgentState:
         intent=state.get("intent"),
         selected_candidate=state.get("selected_candidate")
     )
-    response = await core_llm.ainvoke(prompt)
+    response = await get_core_llm().ainvoke(prompt)
     return {"plan": response.content.strip()}
 
 async def tool_selection(state: AgentState) -> AgentState:
@@ -47,7 +59,7 @@ async def tool_selection(state: AgentState) -> AgentState:
         intent=state.get("intent"),
         plan=state.get("plan")
     )
-    response = await core_llm.ainvoke(prompt)
+    response = await get_core_llm().ainvoke(prompt)
     try:
         raw_content = response.content.replace("```json", "").replace("```", "").strip()
         tool_data = json.loads(raw_content)
@@ -76,12 +88,12 @@ async def mcp_execution(state: AgentState) -> AgentState:
     # Use GPT-4o-mini (content_llm) dynamically for content tasks
     if server == "gmail" and action == "send_email":
         content_prompt = f"Write a professional HR email regarding an interview for {payload.get('to', selected_candidate)}. Keep it concise."
-        res = await content_llm.ainvoke(content_prompt)
+        res = await get_content_llm().ainvoke(content_prompt)
         payload["body"] = res.content
         
     elif server == "docs" and action == "generate_document":
         content_prompt = f"Write a professional HR Offer Letter for {payload.get('candidate_name', selected_candidate)}. Include a warm welcome and standard placeholder terms."
-        res = await content_llm.ainvoke(content_prompt)
+        res = await get_content_llm().ainvoke(content_prompt)
         payload["content"] = res.content
         
     result = await mcp_client.execute(server, action, payload)
@@ -112,5 +124,5 @@ async def response_node(state: AgentState) -> AgentState:
         mcp_result=state.get("mcp_result"),
         last_ui=state.get("last_ui")
     )
-    response = await core_llm.ainvoke(prompt)
+    response = await get_core_llm().ainvoke(prompt)
     return {"messages": [AIMessage(content=response.content)]}
