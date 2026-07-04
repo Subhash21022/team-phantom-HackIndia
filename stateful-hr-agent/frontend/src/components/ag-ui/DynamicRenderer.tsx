@@ -18,7 +18,6 @@ interface DynamicRendererProps {
 export const DynamicRenderer: React.FC<DynamicRendererProps> = ({ uiConfig, onEmitEvent }) => {
   if (!uiConfig) return null;
 
-  // Global action handler that routes events back to backend
   const handleAction = (eventName: string, payload: any) => {
     onEmitEvent({
       event: eventName,
@@ -28,20 +27,19 @@ export const DynamicRenderer: React.FC<DynamicRendererProps> = ({ uiConfig, onEm
 
   switch (uiConfig.type) {
     case 'table':
-      return <DynamicTable {...uiConfig} onAction={handleAction} />;
+      return <DynamicTable {...(uiConfig as any)} onAction={handleAction} />;
     case 'form':
-      return <DynamicForm {...uiConfig} onAction={handleAction} />;
+      return <DynamicForm {...(uiConfig as any)} onAction={handleAction} />;
     case 'calendar':
-      return <DynamicCalendar {...uiConfig} onAction={handleAction} />;
+      return <DynamicCalendar {...(uiConfig as any)} onAction={handleAction} />;
     case 'dashboard_card':
-      return <DynamicCard {...uiConfig} onAction={handleAction} />;
+      return <DynamicCard {...(uiConfig as any)} onAction={handleAction} />;
     case 'document_preview':
-      return <DynamicDocument {...uiConfig} onAction={handleAction} />;
+      return <DynamicDocument {...(uiConfig as any)} onAction={handleAction} />;
     case 'timeline':
-      // Simplified fallback for timeline if needed
       return (
         <div className="p-4 bg-slate-50 border border-slate-200 rounded">
-          <h3 className="font-bold mb-2">{uiConfig.title || "Timeline"}</h3>
+          <h3 className="font-bold mb-2">{uiConfig.title || 'Timeline'}</h3>
           <pre className="text-xs">{JSON.stringify(uiConfig.events, null, 2)}</pre>
         </div>
       );

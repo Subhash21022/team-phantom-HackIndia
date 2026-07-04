@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
 from app.database.database import get_db
 from app.database.repository import candidate_repo
 
@@ -9,40 +8,60 @@ router = APIRouter(prefix="/api/ui-schema", tags=["ui-schema"])
 
 @router.get("/candidates")
 async def candidates_ui_schema(db: AsyncSession = Depends(get_db)):
-    """Return a UIConfig for the candidates table and a create form.
-    The frontend's DynamicRenderer will render this config directly.
-    """
-    candidates = await candidate_repo.get_candidates(db, skip=0, limit=100)
+    """Return AG-UI schema for proper tab-based CRUD operations."""
+    candidates = await candidate_repo.get_candidates(db, skip=0, limit=200)
 
-    # Convert ORM objects to dicts (pydantic/config from_attributes in schema helps, but repo returns dict-like)
-    data = [
+    rows = [
         {
             "id": c.id,
             "name": c.name,
             "email": c.email,
+            "phone": c.phone,
             "role": c.role,
-            "status": getattr(c, "status", None),
+            "experience": c.experience,
+            "status": c.status,
         }
         for c in candidates
     ]
 
-    ui = {
+    return {
         "type": "table",
-        "title": "Candidates",
-        "data": data,
-        "actions": ["Create"],
-        # provide a create form config that frontend can switch to when Create is clicked
+        "title": "Candidate Management",
+        "columns": [
+            {"key": "id", "label": "ID"},
+            {"key": "name", "label": "Name"},
+            {"key": "email", "label": "Email"},
+            {"key": "phone", "label": "Phone"},
+            {"key": "role", "label": "Role"},
+            {"key": "experience", "label": "Experience"},
+            {"key": "status", "label": "Status"},
+        ],
+        "rows": rows,
+        "actions": ["Read", "Create", "Update", "Delete"],
         "create_form": {
-            "type": "form",
             "title": "Create Candidate",
+            "submit_action": "create_candidate",
             "fields": [
-                {"name": "name", "type": "text"},
-                {"name": "email", "type": "email"},
-                {"name": "role", "type": "text"},
-                {"name": "phone", "type": "text"}
+                {"name": "name", "type": "text", "required": True},
+                {"name": "email", "type": "email", "required": True},
+                {"name": "phone", "type": "text", "required": False},
+                {"name": "role", "type": "text", "required": True},
+                {"name": "experience", "type": "number", "required": False},
+                {"name": "status", "type": "text", "required": False},
             ],
-            "submit_action": "create_candidate"
-        }
+        },
+        "update_form": {
+            "title": "Update Candidate",
+            "submit_action": "update_candidate",
+            "fields": [
+                {"name": "id", "type": "hidden", "required": True},
+                {"name": "name", "type": "text", "required": False},
+                {"name": "email", "type": "email", "required": False},
+                {"name": "phone", "type": "text", "required": False},
+                {"name": "role", "type": "text", "required": False},
+                {"name": "experience", "type": "number", "required": False},
+                {"name": "status", "type": "text", "required": False},
+            ],
+        },
+        "delete_action": "delete_candidate",
     }
-
-    return ui
