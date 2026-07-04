@@ -1,0 +1,19 @@
+# API Framework
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.4
+pydantic-settings==2.3.4
+
+# Database
+SQLAlchemy==2.0.31
+asyncpg==0.29.0
+alembic==1.13.1
+
+# AI & Agent Framework
+langchain==0.2.14
+langchain-openai==0.1.22
+langgraph==0.2.14
+openai==1.40.6
+
+# HTTP Client
+httpx==0.27.0
