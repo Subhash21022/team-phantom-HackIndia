@@ -57,15 +57,15 @@ Rules for generation based on Context:
     "Status": "Confirmed"
   }}
 }}
-3. If the action is converting a candidate to an employee (e.g., convert_to_employee) and mcp_results contains success, output:
+3. If the action is converting a candidate to an employee (e.g., convert_to_employee) and mcp_results contains success, extract the employee details from the mcp_results data field and output:
 {{
   "type": "employee_profile",
   "title": "Employee Profile Created",
   "employee": {{
-    "name": "Employee Name",
-    "email": "Employee Email",
-    "department": "Engineering",
-    "position": "Backend Engineer",
+    "name": "<name from mcp_results data>",
+    "email": "<email from mcp_results data>",
+    "department": "<department from mcp_results data>",
+    "position": "<position from mcp_results data>",
     "status": "Active"
   }}
 }}
@@ -81,6 +81,42 @@ Rules for generation based on Context:
   "url": "https://docs.google.com/document/d/..."
 }}
 5. For listing candidates or employees, output type "table" with proper columns (including an "actions" column) and contextual table-level/workspace-level actions in the "actions" array (e.g. "+ Add Candidate", "Generate Report", "Refresh"). Each row must contain an "actions" key with an array of action objects for that row (e.g., View Profile, Schedule Interview, Generate Offer, Convert Employee, Delete for candidates; and View Profile, Update Details, Documents for employees).
+6. If the action is a dashboard summary or metrics request (e.g. get_dashboard_metrics), output a "dashboard_card" populated with the returned data. It MUST include a "metrics" array. Example:
+{{
+  "type": "dashboard_card",
+  "title": "Candidates Dashboard",
+  "metrics": [
+    {{"label": "Total Candidates", "value": 150}},
+    {{"label": "Applied", "value": 50, "trend": "+5"}},
+    {{"label": "Interviewing", "value": 20, "trend": "+2"}}
+  ],
+  "recent_activity": [
+    {{"description": "New candidate applied", "timestamp": "2 mins ago"}}
+  ],
+  "actions": ["Refresh"]
+}}
+7. If the action is listing calendar events (e.g., list_events) or the MCP results contain calendar events, ALWAYS generate a "calendar" component. Follow this format:
+{{
+  "type": "calendar",
+  "title": "Interview Calendar",
+  "events": [
+    {{
+      "id": "event_id",
+      "title": "Interview Title",
+      "candidate": "Candidate Name",
+      "start_time": "ISO-8601 string",
+      "end_time": "ISO-8601 string",
+      "meeting_link": "Google Meet url if present",
+      "attendees": ["email1", "email2"]
+    }}
+  ],
+  "actions": [
+    {{
+      "label": "Schedule Interview",
+      "event": "create_interview"
+    }}
+  ]
+}}
 
 Generate the appropriate JSON:
 """

@@ -42,6 +42,13 @@ ACTION_MAP = {
     "remove_candidate": "delete_candidate",
     "schedule_interview": "create_event", # will map to create_interview
     "book_meeting": "create_event",
+    "list_interviews": "list_events",
+    "view_calendar": "list_events",
+    "get_calendar_events": "list_events",
+    "show_calendar": "list_events",
+    "list_employees": "get_employees",
+    "view_employees": "get_employees",
+    "show_employees": "get_employees",
 }
 
 async def input_node(state: AgentState) -> AgentState:
@@ -142,9 +149,6 @@ async def mcp_execution(state: AgentState) -> AgentState:
         # fix invalid actions mapped by GPT
         if server == "calendar" and action in ["create_interview", "schedule_interview"]:
             action = "create_event"
-        if server == "postgres" and action == "convert_to_employee":
-            action = "update_candidate"
-            step["parameters"]["status"] = "employee"
             
         payload = step.get("parameters", {})
         
@@ -210,7 +214,10 @@ async def mcp_execution(state: AgentState) -> AgentState:
                         trace_log += f"🔍 Database MCP\nFound {data[0].get('name')}\n\n"
                         
             if server == "calendar" and result.get("status") == "success":
-                trace_log += f"📅 Calendar MCP\nInterview scheduled\n\n"
+                if action == "list_events":
+                    trace_log += f"📅 Calendar MCP\nCalendar events loaded\n\n"
+                else:
+                    trace_log += f"📅 Calendar MCP\nInterview scheduled\n\n"
             if server == "docs" and result.get("status") == "success":
                 trace_log += f"📄 Docs MCP\nOffer created\n\n"
             if server == "gmail" and result.get("status") == "success":
