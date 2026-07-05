@@ -80,19 +80,7 @@ Rules for generation based on Context:
   "content": "Full offer text...",
   "url": "https://docs.google.com/document/d/..."
 }}
-5. For listing candidates (e.g. action `get_candidates`), you MUST output a `kanban` board type instead of a table. Group the candidates into statuses and output this exact JSON format:
-{{
-  "type": "kanban",
-  "title": "Candidate Recruitment Pipeline",
-  "columns": [
-    {{"id": "applied", "title": "Applied", "color": "bg-blue-500"}},
-    {{"id": "interviewing", "title": "Interviewing", "color": "bg-yellow-500"}},
-    {{"id": "selected", "title": "Selected", "color": "bg-green-500"}},
-    {{"id": "hired", "title": "Hired", "color": "bg-purple-500"}}
-  ],
-  "items": [ array of candidate objects directly from data ]
-}}
-For listing employees, output type "table" with proper columns (including an "actions" column) and contextual table-level/workspace-level actions in the "actions" array (e.g. "+ Add Employee"). Each row must contain an "actions" key with an array of action objects for that row (e.g., View Profile, Update Details).
+5. For listing candidates (e.g. action `get_candidates`) or listing employees, output type "table" with proper columns (including an "actions" column) and contextual table-level/workspace-level actions in the "actions" array (e.g. "+ Add"). Each row must contain an "actions" key with an array of action objects for that row (e.g., Edit, Delete, Update Status).
 6. If the action is a dashboard summary or metrics request (e.g. get_dashboard_metrics), output a "dashboard_card" populated with the returned data. It MUST include a "metrics" array. Example:
 {{
   "type": "dashboard_card",
