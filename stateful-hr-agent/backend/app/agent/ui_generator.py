@@ -95,28 +95,13 @@ Rules for generation based on Context:
   ],
   "actions": ["Refresh"]
 }}
-7. If the action is listing calendar events (e.g., list_events) or the MCP results contain calendar events, ALWAYS generate a "calendar" component. Follow this format:
+7. If the action is fetching calendar events (e.g., get_events) and mcp_results contains success, output:
 {{
   "type": "calendar",
-  "title": "Interview Calendar",
-  "events": [
-    {{
-      "id": "event_id",
-      "title": "Interview Title",
-      "candidate": "Candidate Name",
-      "start_time": "ISO-8601 string",
-      "end_time": "ISO-8601 string",
-      "meeting_link": "Google Meet url if present",
-      "attendees": ["email1", "email2"]
-    }}
-  ],
-  "actions": [
-    {{
-      "label": "Schedule Interview",
-      "event": "create_interview"
-    }}
-  ]
+  "title": "Upcoming Events",
+  "events": [ array of events from data ]
 }}
+8. If intent is CREATE_EVENT or UPDATE_EVENT and mcp_results has no success data, output a form with fields (title, start_time, attendees) and submit_action 'create_event' (or update_event). For UPDATE_EVENT, include a hidden "event_id" field.
 
 Generate the appropriate JSON:
 """

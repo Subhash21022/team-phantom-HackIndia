@@ -6,13 +6,11 @@ import { Loader2, Zap, ChevronRight, ChevronDown, Terminal, Send, Database, Cale
 const API_BASES = ['http://127.0.0.1:8000', 'http://localhost:8000'];
 
 type Toast = { id: number; kind: 'success' | 'error'; message: string; };
-type MessageRole = 'user' | 'agent' | 'loading';
 type TraceItem = { 
   id: number; 
   time: string; 
   text: string; 
-  kind: 'info' | 'success' | 'error';
-  role: MessageRole;
+  kind: 'info' | 'success' | 'error'; 
   traceDetails?: {
     intent?: string;
     plan?: any[];
@@ -20,36 +18,6 @@ type TraceItem = {
     agent_trace_log?: string;
   };
 };
-
-// Maps AG-UI event names to friendly user-visible labels
-const FRIENDLY_ACTION_LABELS: Record<string, string> = {
-  view_candidate:        'Opening candidate profile...',
-  view_profile:          'Opening candidate profile...',
-  view_candidate_profile:'Opening candidate profile...',
-  delete_candidate:      'Deleting candidate...',
-  remove_candidate:      'Deleting candidate...',
-  schedule_interview:    'Scheduling interview...',
-  create_interview:      'Scheduling interview...',
-  create_event:          'Scheduling interview...',
-  generate_offer:        'Generating offer letter...',
-  generate_offer_letter: 'Generating offer letter...',
-  generate_document:     'Generating offer letter...',
-  convert_employee:      'Converting candidate to employee...',
-  convert_to_employee:   'Converting candidate to employee...',
-  update_candidate:      'Updating candidate profile...',
-  edit_candidate:        'Opening edit form...',
-  create_candidate:      'Adding new candidate...',
-  send_email:            'Sending email...',
-  read_candidates:       'Loading candidates...',
-  get_candidates:        'Loading candidates...',
-  refresh:               'Refreshing data...',
-  view_event:            'Opening event details...',
-};
-
-function friendlyLabel(event: string): string {
-  const key = event.toLowerCase().replace(/-/g, '_');
-  return FRIENDLY_ACTION_LABELS[key] ?? 'Processing request...';
-}
 
 function AgentExecutionCollapsible({ details }: { details: any }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -130,10 +98,10 @@ export default function Home() {
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3200);
   };
 
-  const addTrace = (text: string, kind: 'info' | 'success' | 'error' = 'info', role: MessageRole = 'agent') => {
+  const addTrace = (text: string, kind: 'info' | 'success' | 'error' = 'info') => {
     const id = Date.now() + Math.floor(Math.random() * 1000);
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setTrace((prev) => [...prev, { id, time, text, kind, role }]);
+    setTrace((prev) => [...prev, { id, time, text, kind }]);
   };
 
   useEffect(() => {
@@ -142,19 +110,11 @@ export default function Home() {
     }
   }, [trace]);
 
-  // Send a command to the backend agent.
-  // displayLabel: what to show in chat (human friendly). Falls back to text if omitted.
-  // text: the actual instruction sent to the backend LLM (may contain IDs / structured data).
-  const sendAgentCommand = async (text: string, eventName?: string, displayLabel?: string) => {
+  const sendAgentCommand = async (text: string, eventName?: string) => {
     if (!text.trim()) return;
     if (eventName) setCrudActionState({ isBusy: true, event: eventName });
     setIsLoading(true);
-
-    // Show the user-facing label in chat, never the raw technical string
-    const visibleLabel = displayLabel ?? text;
-    const userMsgId = Date.now() + Math.floor(Math.random() * 1000);
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setTrace((prev) => [...prev, { id: userMsgId, time, text: visibleLabel, kind: 'info', role: 'user' }]);
+    addTrace(`User Input: ${text}`, 'info');
     
     try {
       const res = await apiRequest('/api/chat/', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text }) }, 1);
@@ -169,14 +129,13 @@ export default function Home() {
         setTrace((prev) => [...prev, { 
           id, 
           time, 
-          text: data.response,
+          text: `Agent Response: ${data.response}`, 
           kind: 'success',
-          role: 'agent',
           traceDetails: data.trace
         }]);
       }
     } catch (error: any) { 
-      addTrace(error?.message || 'Agent instruction failed', 'error', 'agent'); 
+      addTrace(error?.message || 'Agent instruction failed', 'error'); 
       pushToast('error', error?.message || 'Action failed.'); 
     }
     finally { 
@@ -190,122 +149,67 @@ export default function Home() {
     const cmd = chatInput.trim();
     if (!cmd || isLoading) return;
     setChatInput('');
-    sendAgentCommand(cmd, undefined, cmd);
+    sendAgentCommand(cmd);
   };
 
   const handleAction = async (payload: { event: string; payload: any }) => {
     const { event, payload: pl } = payload as any;
-    const label = friendlyLabel(event);
-
-    // Domain quick-launch shortcuts
+    
     if (event === 'open_domain') {
       const d = pl?.domain;
-      if (d === 'hiring')     { await sendAgentCommand('Show all candidates',                  event, 'Loading candidates...'); return; }
-      if (d === 'documents')  { await sendAgentCommand('Show latest offers and documents',     event, 'Loading documents...'); return; }
-      if (d === 'scheduling') { await sendAgentCommand('Show interview calendar',              event, 'Opening interview schedule...'); return; }
-      if (d === 'employees')  { await sendAgentCommand('Show all employees',                  event, 'Loading employee directory...'); return; }
+      if (d === 'hiring') { await sendAgentCommand('Show all candidates'); return; }
+      if (d === 'documents') { await sendAgentCommand('Show latest offers and documents'); return; }
+      if (d === 'scheduling') { await sendAgentCommand('Show interview calendar and upcoming events'); return; }
+      if (d === 'employees') { await sendAgentCommand('Show all employees and HR records'); return; }
     }
-
-    // Inline example-prompt shortcuts
-    if (event === 'ask_example_prompt' && pl?.prompt) {
-      await sendAgentCommand(pl.prompt, event, pl.prompt);
-      return;
-    }
-
-    // ── Candidate actions ──
+    if (event === 'ask_example_prompt' && pl?.prompt) { await sendAgentCommand(pl.prompt); return; }
+    
     if (event === 'read_candidates') {
-      await sendAgentCommand('Show all candidates', event, 'Loading candidates...');
+      await sendAgentCommand('Show all candidates', event);
       return;
     }
     if (event === 'create_candidate') {
-      const name = pl?.name || 'new candidate';
-      await sendAgentCommand(
-        `Add a new candidate: ${JSON.stringify(pl)}`,
-        event,
-        `Adding ${name}...`
-      );
+      await sendAgentCommand(`Add a new candidate: ${JSON.stringify(pl)}`, event);
       return;
     }
     if (event === 'update_candidate') {
-      const name = pl?.name || `ID ${pl?.id}`;
-      await sendAgentCommand(
-        `Update candidate (ID: ${pl?.id}) with the following data: ${JSON.stringify(pl)}`,
-        event,
-        `Updating ${name}...`
-      );
+      await sendAgentCommand(`Update candidate (ID: ${pl?.id}) with the following data: ${JSON.stringify(pl)}`, event);
       return;
     }
     if (event === 'delete_candidate') {
-      const name = pl?.name || `ID ${pl?.id}`;
-      await sendAgentCommand(
-        `Delete candidate with ID: ${pl?.id}`,
-        event,
-        `Deleting ${name}...`
-      );
+      await sendAgentCommand(`Delete candidate with ID: ${pl?.id}`, event);
       return;
     }
     if (event === 'edit_candidate') {
-      const name = pl?.name || `ID ${pl?.id}`;
-      await sendAgentCommand(
-        `Show me an edit form to update candidate ID ${pl?.id}`,
-        event,
-        `Editing ${name}...`
-      );
-      return;
+        await sendAgentCommand(`Show me an edit form to update candidate ID ${pl?.id}`, event);
+        return;
     }
-    if (event === 'schedule_interview' || event === 'create_interview') {
-      const name = pl?.name || pl?.candidate_name || (pl?.candidate_id ? `candidate ${pl.candidate_id}` : 'candidate');
-      await sendAgentCommand(
-        `Schedule an interview for ${name}`,
-        event,
-        `Scheduling interview for ${name}...`
-      );
-      return;
+    if (event === 'schedule_interview') {
+        await sendAgentCommand(`Schedule an interview for candidate ID ${pl?.id} tomorrow`, event);
+        return;
     }
-    if (event === 'generate_offer' || event === 'generate_offer_letter' || event === 'generate_document') {
-      const name = pl?.name || pl?.candidate_name || 'candidate';
-      await sendAgentCommand(
-        `Generate an offer letter for ${name}`,
-        event,
-        `Generating offer letter for ${name}...`
-      );
-      return;
+    if (event === 'create_event') {
+        if (Object.keys(pl || {}).length === 0) {
+            await sendAgentCommand(`Show me a form to create a new calendar event`, event);
+        } else {
+            await sendAgentCommand(`Create a new calendar event with data: ${JSON.stringify(pl)}`, event);
+        }
+        return;
     }
-    if (event === 'convert_employee' || event === 'convert_to_employee') {
-      const name = pl?.name || pl?.candidate_name || 'candidate';
-      await sendAgentCommand(
-        `Convert ${name} to employee`,
-        event,
-        `Converting ${name} to employee...`
-      );
-      return;
+    if (event === 'update_event') {
+        await sendAgentCommand(`Update calendar event ID ${pl?.event_id} with data: ${JSON.stringify(pl)}`, event);
+        return;
     }
-    if (event === 'view_candidate' || event === 'view_profile' || event === 'view_candidate_profile') {
-      const name = pl?.name || pl?.candidate_name || 'candidate';
-      await sendAgentCommand(
-        `Show profile for ${name}`,
-        event,
-        `Opening profile for ${name}...`
-      );
-      return;
+    if (event === 'edit_event_form') {
+        await sendAgentCommand(`Show me an edit form for calendar event ID ${pl?.event_id} titled "${pl?.title}"`, event);
+        return;
     }
-    if (event === 'send_email') {
-      const name = pl?.name || pl?.to || 'candidate';
-      await sendAgentCommand(
-        `Send email to ${name}`,
-        event,
-        `Sending email to ${name}...`
-      );
-      return;
+    if (event === 'cancel_event') {
+        await sendAgentCommand(`Cancel calendar event with ID: ${pl?.event_id}`, event);
+        return;
     }
-
-    // ── Generic catch-all: NEVER show raw JSON to user ──
-    // Build a clean natural language instruction for the backend
-    const name = pl?.name || pl?.candidate_name || pl?.candidate_id || '';
-    const naturalInstruction = name
-      ? `${event.replace(/_/g, ' ')} for ${name}`
-      : event.replace(/_/g, ' ');
-    await sendAgentCommand(naturalInstruction, event, label);
+    
+    await sendAgentCommand(`User requested action: ${event}. Payload: ${JSON.stringify(pl)}`, event);
   };
 
   return (
@@ -336,28 +240,18 @@ export default function Home() {
             {trace.length === 0 && !isLoading && (
               <p className="text-[11px] text-[#a3a3a3] text-center mt-10">Waiting for instructions...</p>
             )}
-
+            
             {trace.map((item, idx) => {
-              const isUser = item.role === 'user';
-              const text = item.text;
-
+              const isUser = item.text.startsWith('User Input:');
+              const text = isUser ? item.text.replace('User Input: ', '') : item.text.replace('Agent Response: ', '');
+              
               return (
                 <div key={`${item.id}-${idx}`} className="animate-fade-in">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[9px] font-mono uppercase font-semibold ${
-                      isUser ? 'text-[#404040]' : 'text-[#2563eb]'
-                    }`}>
-                      {isUser ? 'You' : 'Agent'}
-                    </span>
+                    <span className="text-[9px] font-mono text-[#737373] uppercase">{isUser ? 'User' : 'Agent'}</span>
                     <span className="text-[9px] font-mono text-[#a3a3a3]">{item.time}</span>
                   </div>
-                  <div className={`text-[12px] rounded-lg p-3 leading-relaxed ${
-                    isUser
-                      ? 'bg-white border border-[#e5e5e5] text-[#404040] shadow-sm'
-                      : item.kind === 'error'
-                        ? 'bg-[#fef2f2] border border-[#fecaca] text-[#dc2626]'
-                        : 'bg-[#f0f7ff] border border-[#bfdbfe] text-[#1e40af]'
-                  }`}>
+                  <div className={`text-[12px] rounded-lg p-3 ${isUser ? 'bg-white border border-[#e5e5e5] text-[#404040] shadow-sm' : 'bg-transparent border border-[#e5e5e5] text-[#404040]'}`}>
                     <div>{text}</div>
                     {!isUser && item.traceDetails && (
                       <AgentExecutionCollapsible details={item.traceDetails} />
@@ -368,27 +262,9 @@ export default function Home() {
             })}
 
             {isLoading && (
-              <div className="animate-fade-in">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-[9px] font-mono uppercase font-semibold text-[#2563eb]">Agent</span>
-                </div>
-                <div className="bg-[#f0f7ff] border border-[#bfdbfe] rounded-lg p-3 space-y-1.5">
-                  <div className="flex items-center gap-2 text-[11px] text-[#1e40af]">
-                    <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
-                    <span>🧠 Understanding request</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[11px] text-[#3b82f6] opacity-75">
-                    <span className="ml-5">🔍 Using tools</span>
-                    <span className="inline-flex gap-0.5">
-                      <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
-                      <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
-                      <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[11px] text-[#3b82f6] opacity-50">
-                    <span className="ml-5">✨ Updating workspace</span>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 py-3 px-2">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#737373]" />
+                <span className="text-[11px] text-[#737373] font-mono">Agent thinking...</span>
               </div>
             )}
             <div ref={traceEndRef} />

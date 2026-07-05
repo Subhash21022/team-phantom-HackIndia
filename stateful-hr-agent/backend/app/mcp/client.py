@@ -26,6 +26,7 @@ MCP_ACTIONS: Dict[str, Dict[str, ServerAction]] = {
         "get_dashboard_metrics": _wrap(execute_postgres, "get_dashboard_metrics"),
     },
     "calendar_mcp": {
+        "get_events": _wrap(execute_calendar, "get_events"),
         "create_event": _wrap(execute_calendar, "create_event"),
         "list_events": _wrap(execute_calendar, "list_events"),
         "update_event": _wrap(execute_calendar, "update_event"),
