@@ -86,8 +86,11 @@ export const DynamicKanban: React.FC<KanbanProps> = ({ title = "Candidate Pipeli
                       
                       <div className="space-y-1.5 mt-1">
                         {item.email && (
-                          <div className="flex items-center gap-2 text-[11px] text-[#737373]">
-                            <Mail className="w-3 h-3 text-[#a3a3a3]" />
+                          <div 
+                            className="flex items-center gap-2 text-[11px] text-[#737373] hover:text-[#2563eb] cursor-pointer transition-colors"
+                            onClick={(e) => { e.stopPropagation(); onAction('workflow', { message: `Draft and send a quick follow-up email to ${item.name} regarding their application status` }); }}
+                          >
+                            <Mail className="w-3 h-3 text-current" />
                             <span className="truncate">{item.email}</span>
                           </div>
                         )}
