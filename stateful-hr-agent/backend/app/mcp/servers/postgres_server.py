@@ -52,6 +52,13 @@ async def execute_postgres(action: str, payload: Dict[str, Any]) -> Dict[str, An
             ]
             if name_filter:
                 result = [row for row in result if name_filter in str(row.get("name", "")).lower()]
+            
+            # Dynamically filter based on arbitrary user input (e.g. role, status, experience)
+            for key, val in payload.items():
+                if key not in ["skip", "limit", "name", "id"] and val:
+                    val_lower = str(val).lower()
+                    result = [row for row in result if val_lower in str(row.get(key, "")).lower()]
+
             return {"status": "success", "data": result}
 
         if action == "get_employees":
@@ -73,6 +80,13 @@ async def execute_postgres(action: str, payload: Dict[str, Any]) -> Dict[str, An
             ]
             if name_filter:
                 data = [row for row in data if name_filter in str(row.get("name", "")).lower()]
+                
+            # Dynamically filter based on arbitrary user input (e.g. department, position)
+            for key, val in payload.items():
+                if key not in ["skip", "limit", "name", "id"] and val:
+                    val_lower = str(val).lower()
+                    data = [row for row in data if val_lower in str(row.get(key, "")).lower()]
+
             return {"status": "success", "data": data}
 
         if action == "update_candidate":
