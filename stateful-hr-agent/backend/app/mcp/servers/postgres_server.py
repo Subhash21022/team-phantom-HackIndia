@@ -52,6 +52,14 @@ async def execute_postgres(action: str, payload: Dict[str, Any]) -> Dict[str, An
             ]
             if name_filter:
                 result = [row for row in result if name_filter in str(row.get("name", "")).lower()]
+            
+            # Dynamically filter based on arbitrary user input (e.g. role, status, experience)
+            for key, val in payload.items():
+                if key not in ["skip", "limit", "name", "id"] and val:
+                    if result and key in result[0]:
+                        val_lower = str(val).lower()
+                        result = [row for row in result if val_lower in str(row.get(key, "")).lower()]
+
             return {"status": "success", "data": result}
 
         if action == "get_employees":
@@ -73,17 +81,29 @@ async def execute_postgres(action: str, payload: Dict[str, Any]) -> Dict[str, An
             ]
             if name_filter:
                 data = [row for row in data if name_filter in str(row.get("name", "")).lower()]
+                
+            # Dynamically filter based on arbitrary user input (e.g. department, position)
+            for key, val in payload.items():
+                if key not in ["skip", "limit", "name", "id"] and val:
+                    if data and key in data[0]:
+                        val_lower = str(val).lower()
+                        data = [row for row in data if val_lower in str(row.get(key, "")).lower()]
+
             return {"status": "success", "data": data}
 
         if action == "update_candidate":
-            candidate_id = payload.get("id")
+            candidate_id = payload.get("id") or payload.get("candidate_id")
             if not candidate_id:
                 return {"status": "error", "message": "candidate id required"}
 
             known_fields = {"name", "email", "phone", "role", "skills", "experience", "status", "resume_url"}
-            update_raw = payload.get("data") if isinstance(payload.get("data"), dict) else {
-                k: v for k, v in payload.items() if k in known_fields
-            }
+            
+            data_dict = payload.get("data") or payload.get("update_data")
+            if isinstance(data_dict, dict):
+                update_raw = data_dict
+            else:
+                update_raw = {k: v for k, v in payload.items() if k in known_fields}
+                
             update_data = schemas.CandidateUpdate(**(update_raw or {}))
 
             db_candidate = await candidate_repo.update_candidate(db, candidate_id, update_data)
@@ -145,10 +165,10 @@ async def execute_postgres(action: str, payload: Dict[str, Any]) -> Dict[str, An
             }
 
         if action == "delete_candidate":
-            candidate_id = payload.get("id")
+            candidate_id = payload.get("id") or payload.get("candidate_id")
             if not candidate_id:
                 return {"status": "error", "message": "candidate id required"}
-            db_candidate = await candidate_repo.delete_candidate(db, candidate_id)
+            db_candidate = await candidate_repo.delete_candidate(db, int(candidate_id))
             if db_candidate:
                 return {"status": "success", "message": "Candidate deleted"}
             return {"status": "error", "message": "candidate not found"}

@@ -80,7 +80,7 @@ Rules for generation based on Context:
   "content": "Full offer text...",
   "url": "https://docs.google.com/document/d/..."
 }}
-5. For listing candidates or employees, output type "table" with proper columns (including an "actions" column) and contextual table-level/workspace-level actions in the "actions" array (e.g. "+ Add Candidate", "Generate Report", "Refresh"). Each row must contain an "actions" key with an array of action objects for that row (e.g., View Profile, Schedule Interview, Generate Offer, Convert Employee, Delete for candidates; and View Profile, Update Details, Documents for employees).
+5. For listing candidates (e.g. action `get_candidates`) or listing employees, output type "table" with proper columns (including an "actions" column) and contextual table-level/workspace-level actions in the "actions" array (e.g. "+ Add"). Each row must contain an "actions" key with an array of action objects for that row (e.g., Edit, Delete, Update Status).
 6. If the action is a dashboard summary or metrics request (e.g. get_dashboard_metrics), output a "dashboard_card" populated with the returned data. It MUST include a "metrics" array. Example:
 {{
   "type": "dashboard_card",
@@ -102,6 +102,9 @@ Rules for generation based on Context:
   "events": [ array of events from data ]
 }}
 8. If intent is CREATE_EVENT or UPDATE_EVENT and mcp_results has no success data, output a form with fields (title, start_time, attendees) and submit_action 'create_event' (or update_event). For UPDATE_EVENT, include a hidden "event_id" field.
+9. If the action or intent involves creating or editing a candidate (e.g. 'create_candidate', 'update_candidate', 'edit_candidate'):
+   - If mcp_results contains a success status, output a "dashboard_card" with a success message confirming the update.
+   - If mcp_results DOES NOT contain a success status (or has an error), YOU MUST output a "form". The form should include fields (name, email, phone, role, experience) and submit_action 'create_candidate' (or 'update_candidate'). For editing, include a hidden "id" field populated with the candidate's ID.
 
 Generate the appropriate JSON:
 """

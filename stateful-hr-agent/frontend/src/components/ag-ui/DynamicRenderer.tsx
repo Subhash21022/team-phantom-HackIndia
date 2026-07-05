@@ -22,6 +22,7 @@ import { DynamicAgentTrace } from './DynamicAgentTrace';
 import { DynamicDataExplorer } from './DynamicDataExplorer';
 import { DynamicMailView } from './DynamicMailView';
 import { DynamicEmployeeProfile } from './DynamicEmployeeProfile';
+import { DynamicKanban } from './DynamicKanban';
 
 export const DynamicRenderer: React.FC<DynamicRendererProps> = ({ uiConfig, actionState, onEmitEvent }) => {
   if (!uiConfig) return null;
@@ -52,6 +53,8 @@ export const DynamicRenderer: React.FC<DynamicRendererProps> = ({ uiConfig, acti
       return <DynamicCard {...(uiConfig as any)} onAction={handleAction} />;
     case 'employee_profile':
       return <DynamicEmployeeProfile {...(uiConfig as any)} onAction={handleAction} />;
+    case 'kanban':
+      return <DynamicKanban {...(uiConfig as any)} onAction={handleAction} />;
     case 'document_preview':
       return <DynamicDocument {...(uiConfig as any)} onAction={handleAction} />;
     case 'timeline':
