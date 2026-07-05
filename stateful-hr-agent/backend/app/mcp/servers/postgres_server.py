@@ -90,14 +90,18 @@ async def execute_postgres(action: str, payload: Dict[str, Any]) -> Dict[str, An
             return {"status": "success", "data": data}
 
         if action == "update_candidate":
-            candidate_id = payload.get("id")
+            candidate_id = payload.get("id") or payload.get("candidate_id")
             if not candidate_id:
                 return {"status": "error", "message": "candidate id required"}
 
             known_fields = {"name", "email", "phone", "role", "skills", "experience", "status", "resume_url"}
-            update_raw = payload.get("data") if isinstance(payload.get("data"), dict) else {
-                k: v for k, v in payload.items() if k in known_fields
-            }
+            
+            data_dict = payload.get("data") or payload.get("update_data")
+            if isinstance(data_dict, dict):
+                update_raw = data_dict
+            else:
+                update_raw = {k: v for k, v in payload.items() if k in known_fields}
+                
             update_data = schemas.CandidateUpdate(**(update_raw or {}))
 
             db_candidate = await candidate_repo.update_candidate(db, candidate_id, update_data)
